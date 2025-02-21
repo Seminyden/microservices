@@ -21,17 +21,32 @@ services:
     ports:
       - "${SONG_DB_PORT}:${DB_DEFAULT_PORT}"
       
+  service-registry:
+    build:
+      context: ./service-registry
+    environment:
+      APPLICATION_NAME: ${SERVICE_REGISTRY_APPLICATION_NAME}
+      PORT: ${SERVICE_REGISTRY_PORT}
+    ports:
+      - "${SERVICE_REGISTRY_PORT}:${SERVICE_REGISTRY_PORT}"
+
+      
   resource-service:
     build:
       context: ./resource-service
     environment:
+      APPLICATION_NAME: ${RESOURCE_SERVICE_APPLICATION_NAME}
       PORT: ${RESOURCE_SERVICE_PORT}
+      SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
+      SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
       DB_URL: resource-db
-      DB_PORT: ${RESOURCE_DB_PORT}
+      DB_PORT: ${DB_DEFAULT_PORT}
       DB_USERNAME: ${RESOURCE_DB_USERNAME}
       DB_PASSWORD: ${RESOURCE_DB_PASSWORD}
-      SONG_SERVICE_URL: song-service
-      SONG_SERVICE_PORT: ${SONG_SERVICE_PORT}
+      SONG_SERVICE_URL: ${SONG_SERVICE_APPLICATION_NAME}
+    depends_on:
+      - service-registry
+      - resource-db
     ports:
       - "${RESOURCE_SERVICE_PORT}:${RESOURCE_SERVICE_PORT}"
   
@@ -39,10 +54,18 @@ services:
     build:
       context: ./song-service
     environment:
+      APPLICATION_NAME: ${SONG_SERVICE_APPLICATION_NAME}
       PORT: ${SONG_SERVICE_PORT}
+      SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
+      SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
       DB_URL: song-db
-      DB_PORT: ${SONG_DB_PORT}
+      DB_PORT: ${DB_DEFAULT_PORT}
       DB_USERNAME: ${SONG_DB_USERNAME}
       DB_PASSWORD: ${SONG_DB_PASSWORD}
+    deploy:
+      replicas: 2
+    depends_on:
+      - service-registry
+      - song-db
     ports:
-      - "${SONG_SERVICE_PORT}:${SONG_SERVICE_PORT}"
+      - "${SONG_SERVICE_OUT_PORT_RANGE}:${SONG_SERVICE_PORT}"

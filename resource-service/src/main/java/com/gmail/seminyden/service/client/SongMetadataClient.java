@@ -3,6 +3,7 @@ package com.gmail.seminyden.service.client;
 import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.model.SongMetadataDTO;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,9 +23,12 @@ public class SongMetadataClient {
     @Value("${app.songs.metadata.delete.endpoint}")
     private String deleteEndpoint;
 
+    @Resource
+    private RestTemplate restTemplate;
+
     public EntityIdDTO create(SongMetadataDTO songMetadataDTO) {
         System.out.println(baseUrl + createEndpoint);
-        return new RestTemplate().postForObject(
+        return restTemplate.postForObject(
                 baseUrl + createEndpoint,
                 new HttpEntity<>(songMetadataDTO, getHeaders()),
                 EntityIdDTO.class
@@ -33,7 +37,7 @@ public class SongMetadataClient {
 
     public EntityIdsDTO delete(String ids) {
         System.out.println(baseUrl + deleteEndpoint + ids);
-        return new RestTemplate().exchange(
+        return restTemplate.exchange(
                 baseUrl + deleteEndpoint + ids,
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
