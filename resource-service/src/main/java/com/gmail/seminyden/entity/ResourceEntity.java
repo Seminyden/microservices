@@ -12,5 +12,6 @@ public class ResourceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    private byte[] resource;
+    private String s3Bucket;
+    private String key;
 }
