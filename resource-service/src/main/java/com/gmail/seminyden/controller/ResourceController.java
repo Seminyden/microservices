@@ -3,21 +3,21 @@ package com.gmail.seminyden.controller;
 import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.service.ResourceService;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import jakarta.websocket.server.PathParam;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/resources")
+@RequiredArgsConstructor
 public class ResourceController {
 
-    @Resource
-    private ResourceService resourceService;
+    private final ResourceService resourceService;
 
     @PostMapping(consumes = "audio/mpeg")
     public ResponseEntity<?> createResource(

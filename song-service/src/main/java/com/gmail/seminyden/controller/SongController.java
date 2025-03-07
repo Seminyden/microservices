@@ -4,21 +4,21 @@ import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.model.SongMetadataDTO;
 import com.gmail.seminyden.service.SongMetadataService;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import jakarta.websocket.server.PathParam;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/songs")
+@RequiredArgsConstructor
 public class SongController {
 
-    @Resource
-    private SongMetadataService songMetadataService;
+    private final SongMetadataService songMetadataService;
 
     @PostMapping
     public ResponseEntity<EntityIdDTO> createSongMetadata(

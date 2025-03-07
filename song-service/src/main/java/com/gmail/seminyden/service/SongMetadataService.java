@@ -8,19 +8,18 @@ import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.model.SongMetadataDTO;
 import com.gmail.seminyden.repository.SongMetadataRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SongMetadataService {
 
-    @Resource
-    private SongMetadataRepository songMetadataRepository;
-    @Resource
-    private SongMetadataMapper songMetadataMapper;
+    private final SongMetadataRepository songMetadataRepository;
+    private final SongMetadataMapper songMetadataMapper;
 
     public EntityIdDTO createSongMetadata(SongMetadataDTO songMetadata) {
         if (!songMetadataRepository.existsById(songMetadata.getId())) {
