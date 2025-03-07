@@ -7,38 +7,38 @@ import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.repository.ResourceRepository;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ResourceService {
 
     @Resource
-    private SongMetadataService songMetadataService;
-    @Resource
     private ResourceRepository resourceRepository;
+    @Resource
+    private ResourceS3Service resourceS3Service;
     @Resource
     private ResourceMapper resourceMapper;
 
+    @Value("aws.s3.resource.bucket")
+    private String resourceS3Bucket;
+
     public EntityIdDTO createResource(byte[] resource) {
+        String resourceKey = UUID.randomUUID().toString();
+        resourceS3Service.put(resourceS3Bucket, resourceKey, resource);
         ResourceEntity resourceEntity = resourceRepository.save(
-                resourceMapper.toResourceEntity(resource)
-        );
-        songMetadataService.createSongMetadata(
-                resourceMapper.toString(resourceEntity.getId()), resource
+                resourceMapper.toResourceEntity(resourceS3Bucket, resourceKey)
         );
         return resourceMapper.toEntityIdDTO(resourceEntity);
     }
 
     public byte[] getResource(String id) {
         return resourceRepository.findById(resourceMapper.toInt(id))
-                .map(ResourceEntity::getResource)
+                .map(resource -> resourceS3Service.get(resource.getS3Bucket(), resource.getKey()))
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Resource with the specified ID does not exist.")
                 );
@@ -50,8 +50,11 @@ public class ResourceService {
                 .forEach(resourceEntity -> {
                     deletedResourceIds.add(resourceEntity.getId());
                     resourceRepository.delete(resourceEntity);
+                    resourceS3Service.delete(
+                            resourceEntity.getS3Bucket(),
+                            resourceEntity.getKey()
+                    );
                 });
-        songMetadataService.deleteSongsMetadata(ids);
         return resourceMapper.toEntityIdsDTO(deletedResourceIds);
     }
 }

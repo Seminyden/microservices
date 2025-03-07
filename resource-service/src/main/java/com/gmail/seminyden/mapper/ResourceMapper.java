@@ -12,9 +12,12 @@ import java.util.stream.Collectors;
 @Component
 public class ResourceMapper {
 
-    public ResourceEntity toResourceEntity(byte[] resource) {
+    private static final String COMMA = ",";
+
+    public ResourceEntity toResourceEntity(String s3Bucket, String key) {
         ResourceEntity entity = new ResourceEntity();
-        entity.setResource(resource);
+        entity.setS3Bucket(s3Bucket);
+        entity.setKey(key);
         return entity;
     }
 
@@ -30,12 +33,8 @@ public class ResourceMapper {
                 .build();
     }
 
-    public String toString(Integer value) {
-        return String.valueOf(value);
-    }
-
     public List<Integer> toIntList(String ids) {
-        return Arrays.stream(ids.split(","))
+        return Arrays.stream(ids.split(COMMA))
                 .map(this::toInt)
                 .collect(Collectors.toList());
     }

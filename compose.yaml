@@ -30,7 +30,6 @@ services:
     ports:
       - "${SERVICE_REGISTRY_PORT}:${SERVICE_REGISTRY_PORT}"
 
-      
   resource-service:
     build:
       context: ./resource-service
@@ -43,12 +42,20 @@ services:
       DB_PORT: ${DB_DEFAULT_PORT}
       DB_USERNAME: ${RESOURCE_DB_USERNAME}
       DB_PASSWORD: ${RESOURCE_DB_PASSWORD}
-      SONG_SERVICE_URL: ${SONG_SERVICE_APPLICATION_NAME}
+      AWS_S3_REGION: ${AWS_S3_REGION}
+      AWS_S3_RESOURCE_BUCKET: ${AWS_S3_RESOURCE_BUCKET}
     depends_on:
       - service-registry
       - resource-db
     ports:
       - "${RESOURCE_SERVICE_PORT}:${RESOURCE_SERVICE_PORT}"
+
+  resource-processor:
+    build:
+      context: ./resource-processor
+    environment:
+      APPLICATION_NAME: ${RESOURCE_PROCESSOR_APPLICATION_NAME}
+      PORT: ${RESOURCE_PROCESSOR_PORT}
   
   song-service:
     build:
@@ -63,7 +70,7 @@ services:
       DB_USERNAME: ${SONG_DB_USERNAME}
       DB_PASSWORD: ${SONG_DB_PASSWORD}
     deploy:
-      replicas: 2
+      replicas: 1
     depends_on:
       - service-registry
       - song-db
