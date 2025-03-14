@@ -14,9 +14,9 @@ public class SongMetadataMapper {
     private static final String DURATION        = "xmpDM:duration";
     private static final String RELEASE_DATE    = "xmpDM:releaseDate";
 
-    public SongMetadataDTO toSongMetadataDTO(String id, Metadata metadata) {
+    public SongMetadataDTO toSongMetadataDTO(Integer id, Metadata metadata) {
         return SongMetadataDTO.builder()
-                .id(id)
+                .id(String.valueOf(id))
                 .name(metadata.get(TITLE))
                 .artist(metadata.get(ARTIST))
                 .album(metadata.get(ALBUM))

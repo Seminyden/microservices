@@ -1,7 +1,8 @@
 package com.gmail.seminyden.service;
 
 import com.gmail.seminyden.mapper.SongMetadataMapper;
-import com.gmail.seminyden.model.SongMetadataDTO;
+import com.gmail.seminyden.model.EntityIdDTO;
+import com.gmail.seminyden.service.client.SongMetadataClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.tika.metadata.Metadata;
 import org.springframework.stereotype.Service;
@@ -10,11 +11,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SongMetadataService {
 
+    private final SongMetadataClient songMetadataClient;
     private final MetadataService metadataService;
     private final SongMetadataMapper songMetadataMapper;
 
-    public SongMetadataDTO getSongMetadata(String resourceId, byte[] resource) {
-        Metadata metadata = metadataService.getMetadata(resource);
-        return songMetadataMapper.toSongMetadataDTO(resourceId, metadata);
+    public EntityIdDTO createSongMetadata(Integer resourceId, byte[] resource) {
+        Metadata songMetadata = metadataService.getMetadata(resource);
+        return songMetadataClient.createSongMetadata(
+                songMetadataMapper.toSongMetadataDTO(resourceId, songMetadata)
+        );
     }
 }
