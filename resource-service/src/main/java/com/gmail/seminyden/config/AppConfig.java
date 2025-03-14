@@ -1,5 +1,6 @@
 package com.gmail.seminyden.config;
 
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,9 @@ public class AppConfig {
     @Value("${aws.s3.region}")
     private String s3Region;
 
+    @Value("${app.resource.processing.queue}")
+    private String resourceProcessingQueue;
+
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
@@ -28,5 +32,10 @@ public class AppConfig {
                         )
                 )
                 .build();
+    }
+
+    @Bean
+    public Queue resourceProcessingQueue() {
+        return new Queue(resourceProcessingQueue);
     }
 }
