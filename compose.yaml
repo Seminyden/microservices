@@ -46,8 +46,14 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_S3_REGION: ${AWS_S3_REGION}
       AWS_S3_RESOURCE_BUCKET: ${AWS_S3_RESOURCE_BUCKET}
+      RABBITMQ_HOST: message-service
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_AMQP_PORT}
+      RESOURCE_PROCESSING_QUEUE: ${RESOURCE_PROCESSING_QUEUE}
     depends_on:
       - service-registry
+      - message-service
       - resource-db
     ports:
       - "${RESOURCE_SERVICE_PORT}:${RESOURCE_SERVICE_PORT}"
@@ -58,6 +64,19 @@ services:
     environment:
       APPLICATION_NAME: ${RESOURCE_PROCESSOR_APPLICATION_NAME}
       PORT: ${RESOURCE_PROCESSOR_PORT}
+      SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
+      SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
+      RABBITMQ_HOST: message-service
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_AMQP_PORT}
+      RESOURCE_PROCESSING_QUEUE: ${RESOURCE_PROCESSING_QUEUE}
+      RESOURCE_SERVICE_HOST: ${RESOURCE_SERVICE_APPLICATION_NAME}
+      SONG_SERVICE_HOST: ${SONG_SERVICE_APPLICATION_NAME}
+    depends_on:
+      - resource-service
+      - song-service
+      - service-registry
   
   song-service:
     build:
@@ -72,9 +91,18 @@ services:
       DB_USERNAME: ${SONG_DB_USERNAME}
       DB_PASSWORD: ${SONG_DB_PASSWORD}
     deploy:
-      replicas: 1
+      replicas: 2
     depends_on:
       - service-registry
       - song-db
     ports:
       - "${SONG_SERVICE_OUT_PORT_RANGE}:${SONG_SERVICE_PORT}"
+
+  message-service:
+    image: rabbitmq:4.0.7-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "${RABBITMQ_AMQP_PORT}:${RABBITMQ_AMQP_PORT}"
+      - "${RABBITMQ_UI_PORT}:${RABBITMQ_UI_PORT}"

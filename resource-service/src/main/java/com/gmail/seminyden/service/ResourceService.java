@@ -20,10 +20,13 @@ public class ResourceService {
 
     private final ResourceRepository resourceRepository;
     private final ResourceS3Service resourceS3Service;
+    private final RabbitMQService rabbitMQService;
     private final ResourceMapper resourceMapper;
 
     @Value("${aws.s3.resource.bucket}")
     private String resourceS3Bucket;
+    @Value("${app.resource.processing.queue}")
+    private String resourceProcessingQueueName;
 
     public EntityIdDTO createResource(byte[] resource) {
         String resourceKey = UUID.randomUUID().toString();
@@ -31,6 +34,7 @@ public class ResourceService {
         ResourceEntity resourceEntity = resourceRepository.save(
                 resourceMapper.toResourceEntity(resourceS3Bucket, resourceKey)
         );
+        rabbitMQService.sendMessage(resourceProcessingQueueName, resourceEntity.getId());
         return resourceMapper.toEntityIdDTO(resourceEntity);
     }
 
