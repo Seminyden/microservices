@@ -1,5 +1,6 @@
 package com.gmail.seminyden.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -18,5 +19,6 @@ public class SongMetadataEntity {
     private String artist;
     private String album;
     private String duration;
+    @Column(name = "\"year\"")
     private String year;
 }
