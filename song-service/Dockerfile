@@ -4,7 +4,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src ./src
-RUN mvn clean package -Dmaven.test.skip=true
+RUN mvn clean test package -Dmaven.test.skip=false
 
 # runtime
 FROM eclipse-temurin:latest

@@ -13,5 +13,6 @@ public class ResourceEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     private String s3Bucket;
+    @Column(name = "\"key\"")
     private String key;
 }

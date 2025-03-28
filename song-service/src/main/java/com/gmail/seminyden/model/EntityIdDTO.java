@@ -9,5 +9,5 @@ import lombok.Setter;
 @Builder
 public class EntityIdDTO {
 
-    private String id;
+    private Integer id;
 }

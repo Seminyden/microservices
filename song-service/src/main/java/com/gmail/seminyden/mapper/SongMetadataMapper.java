@@ -36,7 +36,7 @@ public class SongMetadataMapper {
 
     public EntityIdDTO toEntityIdDTO(SongMetadataEntity entity) {
         return EntityIdDTO.builder()
-                .id(entity.getId())
+                .id(toInt(entity.getId()))
                 .build();
     }
 
@@ -48,5 +48,9 @@ public class SongMetadataMapper {
 
     public List<String> toIdList(String id) {
         return Arrays.asList(id.split(","));
+    }
+
+    private Integer toInt(String value) {
+        return Integer.parseInt(value);
     }
 }
