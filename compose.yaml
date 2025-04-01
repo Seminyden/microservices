@@ -20,7 +20,7 @@ services:
       - ./init-scripts/song-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "${SONG_DB_PORT}:${DB_DEFAULT_PORT}"
-      
+
   service-registry:
     build:
       context: ./service-registry
@@ -46,7 +46,7 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_S3_REGION: ${AWS_S3_REGION}
       AWS_S3_RESOURCE_BUCKET: ${AWS_S3_RESOURCE_BUCKET}
-      RABBITMQ_HOST: message-service
+      RABBITMQ_HOST: ${MESSAGE_SERVICE_APPLICATION_NAME}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_AMQP_PORT}
@@ -66,7 +66,7 @@ services:
       PORT: ${RESOURCE_PROCESSOR_PORT}
       SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
       SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
-      RABBITMQ_HOST: message-service
+      RABBITMQ_HOST: ${MESSAGE_SERVICE_APPLICATION_NAME}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_AMQP_PORT}
@@ -77,7 +77,7 @@ services:
       - resource-service
       - song-service
       - service-registry
-  
+
   song-service:
     build:
       context: ./song-service
@@ -106,3 +106,5 @@ services:
     ports:
       - "${RABBITMQ_AMQP_PORT}:${RABBITMQ_AMQP_PORT}"
       - "${RABBITMQ_UI_PORT}:${RABBITMQ_UI_PORT}"
+volumes:
+  postgres-volume:
