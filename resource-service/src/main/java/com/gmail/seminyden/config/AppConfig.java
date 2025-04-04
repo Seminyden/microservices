@@ -10,6 +10,8 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.net.URI;
+
 @Configuration
 @EnableRabbit
 public class AppConfig {
@@ -20,6 +22,8 @@ public class AppConfig {
     private String secretAccessKey;
     @Value("${aws.s3.region}")
     private String s3Region;
+    @Value( "${aws.url}")
+    private String url;
 
     @Value("${app.resource.processing.queue}")
     private String resourceProcessingQueueName;
@@ -27,7 +31,9 @@ public class AppConfig {
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
+                .forcePathStyle(true)
                 .region(Region.of(s3Region))
+                .endpointOverride(URI.create(url))
                 .credentialsProvider(
                         StaticCredentialsProvider.create(
                                 AwsBasicCredentials.create(accessKeyId, secretAccessKey)
