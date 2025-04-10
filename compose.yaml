@@ -173,3 +173,25 @@ services:
       timeout: 60s
       retries: 3
       start_period: 10s
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+    environment:
+      APPLICATION_NAME: ${GATEWAY_SERVICE_APPLICATION_NAME}
+      PORT: ${GATEWAY_SERVICE_PORT}
+      RESOURCE_SERVICE_HOST: ${RESOURCE_SERVICE_APPLICATION_NAME}
+      SONG_SERVICE_HOST: ${SONG_SERVICE_APPLICATION_NAME}
+      SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
+      SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    ports:
+      - "${GATEWAY_SERVICE_PORT}:${GATEWAY_SERVICE_PORT}"
+    healthcheck:
+      test: "curl --fail --silent localhost:${GATEWAY_SERVICE_PORT}/actuator/health | grep UP || exit 1"
+      interval: 20s
+      timeout: 60s
+      retries: 3
+      start_period: 10s
