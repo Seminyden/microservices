@@ -4,9 +4,9 @@ import com.gmail.seminyden.entity.ResourceEntity;
 import com.gmail.seminyden.mapper.ResourceMapper;
 import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.service.RabbitMQService;
-import com.gmail.seminyden.service.ResourceS3Service;
 import com.gmail.seminyden.service.ResourceService;
 import com.gmail.seminyden.repository.ResourceRepository;
+import com.gmail.seminyden.service.StorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,9 +25,9 @@ public class ResourceServiceUnitTest {
     @Mock
     private ResourceRepository resourceRepository;
     @Mock
-    private ResourceS3Service resourceS3Service;
-    @Mock
     private RabbitMQService rabbitMQService;
+    @Mock
+    private StorageService storageService;
 
     private ResourceService resourceService;
     private ResourceEntity testResource;
@@ -36,15 +36,15 @@ public class ResourceServiceUnitTest {
     void setUp() {
         resourceService = new ResourceService(
                 resourceRepository,
-                resourceS3Service,
                 rabbitMQService,
-                new ResourceMapper()
+                new ResourceMapper(),
+                storageService
         );
 
         testResource = new ResourceEntity();
         testResource.setId(1);
-        testResource.setS3Bucket("test-bucket");
         testResource.setKey("test-key");
+        testResource.setStorageType("STAGING");
     }
 
     @Test
@@ -55,7 +55,7 @@ public class ResourceServiceUnitTest {
 
         assertNotNull(result);
         assertEquals(testResource.getId(), result.getId());
-        verify(resourceS3Service).put(any(), any(), any(byte[].class));
+        verify(storageService).saveResource(any(), any(), any(byte[].class));
         verify(rabbitMQService).sendMessage(any(), any());
         verify(resourceRepository).save(any(ResourceEntity.class));
     }
@@ -63,13 +63,13 @@ public class ResourceServiceUnitTest {
     @Test
     void getResource_WhenResourceExists_Success() {
         when(resourceRepository.findById(1)).thenReturn(Optional.of(testResource));
-        when(resourceS3Service.get(any(), any())).thenReturn(new byte[]{});
+        when(storageService.getResource(any(), any())).thenReturn(new byte[]{});
 
         byte[] result = resourceService.getResource("1");
 
         assertNotNull(result);
         verify(resourceRepository).findById(1);
-        verify(resourceS3Service).get(any(), any());
+        verify(storageService).getResource(any(), any());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ResourceServiceUnitTest {
 
         verify(resourceRepository).delete(testResource);
         verifyNoMoreInteractions(resourceRepository);
-        verify(resourceS3Service).delete(anyString(), anyString());
-        verifyNoMoreInteractions(resourceS3Service);
+        verify(storageService).deleteResource(any(), any());
+        verifyNoMoreInteractions(storageService);
     }
 } 

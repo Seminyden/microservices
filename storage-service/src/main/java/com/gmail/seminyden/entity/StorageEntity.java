@@ -1,19 +1,20 @@
 package com.gmail.seminyden.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
-@Table(name = "resources")
 @Getter
 @Setter
-public class ResourceEntity {
+@Entity
+@Table(name = "storages")
+public class StorageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
-    @Column(name = "\"key\"")
-    private String key;
+    private Long id;
     @Column(name = "storage_type")
     private String storageType;
+    private String bucket;
+    private String path;
 }

@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -27,6 +28,8 @@ public class AppConfig {
 
     @Value("${app.resource.processing.queue}")
     private String resourceProcessingQueueName;
+    @Value("${app.resource.processed.queue}")
+    private String resourceProcessedQueueName;
 
     @Bean
     public S3Client s3Client() {
@@ -45,5 +48,15 @@ public class AppConfig {
     @Bean
     public Queue resourceProcessingQueue() {
         return new Queue(resourceProcessingQueueName);
+    }
+
+    @Bean
+    public Queue resourceProcessedQueue() {
+        return new Queue(resourceProcessedQueueName);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

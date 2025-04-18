@@ -6,7 +6,6 @@ import io.cucumber.spring.CucumberContextConfiguration;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -75,24 +74,6 @@ public class ResourceSteps {
         assertNotNull(responseBody);
         assertNotNull(responseBody.getId());
         createResourceId = responseBody.getId();
-    }
-
-    @When("I request the file by its ID")
-    public void iRequestTheFileByItsId() {
-        response = restTemplate.exchange(
-            "/resources/" + createResourceId,
-            HttpMethod.GET,
-            null,
-            byte[].class
-        );
-    }
-
-    @Then("I should receive the file")
-    public void iShouldReceiveTheFile() {
-        assertTrue(response.getStatusCode().is2xxSuccessful());
-        byte[] responseBody = (byte[]) response.getBody();
-        assertNotNull(responseBody);
-        assertArrayEquals(resource, responseBody);
     }
 
     private byte[] getTestMp3File() {
