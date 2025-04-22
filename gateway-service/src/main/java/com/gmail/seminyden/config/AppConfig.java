@@ -18,8 +18,8 @@ public class AppConfig {
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route(r -> r.path("/resources/**") .uri(resourceServiceUrl + "/resources"))
-                .route(r -> r.path("/songs/**")     .uri(songServiceUrl + "/songs"))
+                .route(r -> r.path("/resources/**").uri(resourceServiceUrl + "/resources"))
+                .route(r -> r.path("/songs/**").uri(songServiceUrl + "/songs"))
                 .build();
     }
 

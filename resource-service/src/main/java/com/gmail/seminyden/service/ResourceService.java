@@ -8,6 +8,7 @@ import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.model.StorageType;
 import com.gmail.seminyden.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
@@ -29,15 +31,19 @@ public class ResourceService {
 
     public EntityIdDTO createResource(byte[] resource) {
         String resourceKey = UUID.randomUUID().toString();
+        log.info("Create resource with key '{}'", resourceKey);
         storageService.saveResource(StorageType.STAGING, resourceKey, resource);
         ResourceEntity resourceEntity = resourceRepository.save(
                 resourceMapper.toResourceEntity(resourceKey, StorageType.STAGING)
         );
         rabbitMQService.sendMessage(resourceProcessingQueueName, resourceEntity.getId());
+        log.info("Resource created '{}' - '{}' ({})",
+                resourceEntity.getId(), resourceEntity.getKey(), resourceEntity.getStorageType());
         return resourceMapper.toEntityIdDTO(resourceEntity);
     }
 
     public byte[] getResource(String id) {
+        log.info("Get resource by id '{}'", id);
         return resourceRepository.findById(resourceMapper.toInt(id))
                 .map(resource ->
                         storageService.getResource(
@@ -54,6 +60,8 @@ public class ResourceService {
         List<Integer> deletedResourceIds = new ArrayList<>();
         resourceRepository.findAllById(resourceMapper.toIntList(ids))
                 .forEach(resourceEntity -> {
+                    log.info("Delete resource '{}' - '{}' ({})",
+                            resourceEntity.getId(), resourceEntity.getKey(), resourceEntity.getStorageType());
                     storageService.deleteResource(
                             StorageType.valueOf(resourceEntity.getStorageType()),
                             resourceEntity.getKey()

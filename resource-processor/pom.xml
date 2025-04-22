@@ -72,6 +72,10 @@
       <version>${tika.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <dependency>
       <groupId>au.com.dius.pact.consumer</groupId>
       <artifactId>junit5</artifactId>
       <version>${pact.version}</version>
