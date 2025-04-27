@@ -3,6 +3,7 @@ package com.gmail.seminyden.mapper;
 import com.gmail.seminyden.entity.ResourceEntity;
 import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
+import com.gmail.seminyden.model.StorageType;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -14,10 +15,10 @@ public class ResourceMapper {
 
     private static final String COMMA = ",";
 
-    public ResourceEntity toResourceEntity(String s3Bucket, String key) {
+    public ResourceEntity toResourceEntity(String key, StorageType storageType) {
         ResourceEntity entity = new ResourceEntity();
-        entity.setS3Bucket(s3Bucket);
         entity.setKey(key);
+        entity.setStorageType(storageType.name());
         return entity;
     }
 
