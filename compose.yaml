@@ -58,6 +58,8 @@ services:
       PORT: ${SERVICE_REGISTRY_PORT}
     ports:
       - "${SERVICE_REGISTRY_PORT}:${SERVICE_REGISTRY_PORT}"
+    volumes:
+      - "./logs:/app/logs"
     healthcheck:
       test: "curl --fail --silent localhost:${SERVICE_REGISTRY_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
@@ -180,6 +182,8 @@ services:
       DB_PORT: ${DB_DEFAULT_PORT}
       DB_USERNAME: ${STORAGE_DB_USERNAME}
       DB_PASSWORD: ${STORAGE_DB_PASSWORD}
+    volumes:
+      - "./logs:/app/logs"
     depends_on:
       storage-db:
         condition: service_healthy
@@ -239,6 +243,8 @@ services:
       SONG_SERVICE_HOST: ${SONG_SERVICE_APPLICATION_NAME}
       SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
       SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
+    volumes:
+      - "./logs:/app/logs"
     depends_on:
       service-registry:
         condition: service_healthy
@@ -256,18 +262,18 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
 
   grafana0:
     image: grafana/grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:
       - ./grafana:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
 
   elasticsearch0:
     image: elasticsearch:8.18.0
@@ -284,8 +290,8 @@ services:
     volumes:
       - "./elastic:/usr/share/elasticsearch/data"
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "${ELASTICSEARCH_PORT_1}:${ELASTICSEARCH_PORT_1}"
+      - "${ELASTICSEARCH_PORT_2}:${ELASTICSEARCH_PORT_2}"
     healthcheck:
       test: "curl --fail --silent localhost:9200/_cluster/health || exit 1"
       interval: 20s
@@ -305,10 +311,10 @@ services:
       elasticsearch0:
         condition: service_healthy
     ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "5044:5044"
-      - "9600:9600"
+      - "${LOGSTASH_PORT_1}:${LOGSTASH_PORT_1}/tcp"
+      - "${LOGSTASH_PORT_1}:${LOGSTASH_PORT_1}/udp"
+      - "${LOGSTASH_PORT_2}:${LOGSTASH_PORT_2}"
+      - "${LOGSTASH_PORT_3}:${LOGSTASH_PORT_3}"
 
   kibana0:
     image: kibana:8.18.0
@@ -320,4 +326,4 @@ services:
       elasticsearch0:
         condition: service_healthy
     ports:
-      - "5601:5601"
+      - "${KIBANA_PORT}:${KIBANA_PORT}"
