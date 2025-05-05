@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'service-metrics'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'resource-service:8071'
+          - 'song-service:8072'
+          - 'song-service:8073'
+          - 'resource-processor:8075'

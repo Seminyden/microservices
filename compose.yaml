@@ -12,8 +12,8 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "${RESOURCE_DB}" ]
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   song-db:
@@ -29,8 +29,8 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "${SONG_DB}" ]
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   storage-db:
@@ -46,8 +46,8 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "${STORAGE_DB}" ]
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   service-registry:
@@ -58,11 +58,13 @@ services:
       PORT: ${SERVICE_REGISTRY_PORT}
     ports:
       - "${SERVICE_REGISTRY_PORT}:${SERVICE_REGISTRY_PORT}"
+    volumes:
+      - "./logs:/app/logs"
     healthcheck:
       test: "curl --fail --silent localhost:${SERVICE_REGISTRY_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   resource-service:
@@ -88,6 +90,8 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_AMQP_PORT}
       RESOURCE_PROCESSING_QUEUE: ${RESOURCE_PROCESSING_QUEUE}
+    volumes:
+      - "./logs:/app/logs"
     depends_on:
       resource-db:
         condition: service_healthy
@@ -102,8 +106,8 @@ services:
     healthcheck:
       test: "curl --fail --silent localhost:${RESOURCE_SERVICE_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   resource-processor:
@@ -122,6 +126,8 @@ services:
       RESOURCE_PROCESSED_QUEUE: ${RESOURCE_PROCESSED_QUEUE}
       RESOURCE_SERVICE_HOST: ${RESOURCE_SERVICE_APPLICATION_NAME}
       SONG_SERVICE_HOST: ${SONG_SERVICE_APPLICATION_NAME}
+    volumes:
+      - "./logs:/app/logs"
     depends_on:
       service-registry:
         condition: service_healthy
@@ -130,8 +136,8 @@ services:
     healthcheck:
       test: "curl --fail --silent localhost:${RESOURCE_PROCESSOR_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   song-service:
@@ -146,8 +152,10 @@ services:
       DB_PORT: ${DB_DEFAULT_PORT}
       DB_USERNAME: ${SONG_DB_USERNAME}
       DB_PASSWORD: ${SONG_DB_PASSWORD}
-    deploy:
-      replicas: 2
+    volumes:
+      - "./logs:/app/logs"
+    #    deploy:
+    #      replicas: 2
     depends_on:
       song-db:
         condition: service_healthy
@@ -158,8 +166,8 @@ services:
     healthcheck:
       test: "curl --fail --silent localhost:${SONG_SERVICE_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   storage-service:
@@ -174,6 +182,8 @@ services:
       DB_PORT: ${DB_DEFAULT_PORT}
       DB_USERNAME: ${STORAGE_DB_USERNAME}
       DB_PASSWORD: ${STORAGE_DB_PASSWORD}
+    volumes:
+      - "./logs:/app/logs"
     depends_on:
       storage-db:
         condition: service_healthy
@@ -186,8 +196,8 @@ services:
     healthcheck:
       test: "curl --fail --silent localhost:${STORAGE_SERVICE_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   message-service:
@@ -201,8 +211,8 @@ services:
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   localstack:
@@ -219,8 +229,8 @@ services:
     healthcheck:
       test: "curl --fail --silent localhost:${LOCALSTACK_PORT}/_localstack/health | grep running || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
 
   gateway-service:
@@ -233,6 +243,8 @@ services:
       SONG_SERVICE_HOST: ${SONG_SERVICE_APPLICATION_NAME}
       SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
       SERVICE_REGISTRY_PORT: ${SERVICE_REGISTRY_PORT}
+    volumes:
+      - "./logs:/app/logs"
     depends_on:
       service-registry:
         condition: service_healthy
@@ -241,6 +253,77 @@ services:
     healthcheck:
       test: "curl --fail --silent localhost:${GATEWAY_SERVICE_PORT}/actuator/health | grep UP || exit 1"
       interval: 20s
-      timeout: 60s
-      retries: 3
+      timeout: 120s
+      retries: 5
       start_period: 10s
+
+  prometheus0:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+
+  grafana0:
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
+
+  elasticsearch0:
+    image: elasticsearch:8.18.0
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - "./elastic:/usr/share/elasticsearch/data"
+    ports:
+      - "${ELASTICSEARCH_PORT_1}:${ELASTICSEARCH_PORT_1}"
+      - "${ELASTICSEARCH_PORT_2}:${ELASTICSEARCH_PORT_2}"
+    healthcheck:
+      test: "curl --fail --silent localhost:9200/_cluster/health || exit 1"
+      interval: 20s
+      timeout: 120s
+      retries: 5
+      start_period: 10s
+
+  logstash0:
+    image: logstash:8.18.0
+    environment:
+      discovery.seed_hosts: logstash0
+      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - "./logstash/pipeline/logstash-nginx.config:/usr/share/logstash/pipeline/logstash-nginx.config"
+      - "./logs:/home/logs/"
+    depends_on:
+      elasticsearch0:
+        condition: service_healthy
+    ports:
+      - "${LOGSTASH_PORT_1}:${LOGSTASH_PORT_1}/tcp"
+      - "${LOGSTASH_PORT_1}:${LOGSTASH_PORT_1}/udp"
+      - "${LOGSTASH_PORT_2}:${LOGSTASH_PORT_2}"
+      - "${LOGSTASH_PORT_3}:${LOGSTASH_PORT_3}"
+
+  kibana0:
+    image: kibana:8.18.0
+    environment:
+      SERVER_SSL_ENABLED: false
+      ELASTICSEARCH_SSL_VERIFICATIONMODE: none
+      ELASTICSEARCH_HOSTS: http://elasticsearch0:9200
+    depends_on:
+      elasticsearch0:
+        condition: service_healthy
+    ports:
+      - "${KIBANA_PORT}:${KIBANA_PORT}"

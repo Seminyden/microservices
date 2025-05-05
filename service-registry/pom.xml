@@ -17,6 +17,7 @@
   <properties>
     <java.version>17</java.version>
     <spring-cloud.version>2024.0.0</spring-cloud.version>
+    <lombok.version>1.18.36</lombok.version>
   </properties>
 
   <dependencyManagement>
@@ -39,6 +40,18 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 

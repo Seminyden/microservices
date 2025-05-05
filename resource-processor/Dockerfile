@@ -10,5 +10,5 @@ RUN mvn clean test package -Dmaven.test.skip=false
 FROM eclipse-temurin:latest
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8071
+EXPOSE 8075
 CMD ["java", "-jar", "app.jar"]
