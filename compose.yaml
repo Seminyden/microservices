@@ -239,6 +239,8 @@ services:
     environment:
       APPLICATION_NAME: ${GATEWAY_SERVICE_APPLICATION_NAME}
       PORT: ${GATEWAY_SERVICE_PORT}
+      AUTH_HOST: authorization-service
+      AUTH_PORT: ${AUTH_PORT}
       RESOURCE_SERVICE_HOST: ${RESOURCE_SERVICE_APPLICATION_NAME}
       SONG_SERVICE_HOST: ${SONG_SERVICE_APPLICATION_NAME}
       SERVICE_REGISTRY_HOST: ${SERVICE_REGISTRY_APPLICATION_NAME}
@@ -327,3 +329,30 @@ services:
         condition: service_healthy
     ports:
       - "${KIBANA_PORT}:${KIBANA_PORT}"
+
+  authorization-service:
+    image: quay.io/keycloak/keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: ${AUTH_PORT}
+      KC_HOSTNAME_URL: http://authorization-service:8100
+      KC_HOSTNAME_ADMIN_URL: http://localhost:8100
+      KC_HOSTNAME_STRICT: true
+      KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "${AUTH_PORT}:${AUTH_PORT}"
+    healthcheck:
+      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8100/auth/health/live']
+      interval: 5s
+      timeout: 5s
+      retries: 20
