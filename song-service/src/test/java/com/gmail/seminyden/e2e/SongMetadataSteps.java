@@ -1,7 +1,6 @@
 package com.gmail.seminyden.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gmail.seminyden.component.TestConfig;
 import com.gmail.seminyden.model.EntityIdDTO;
 import com.gmail.seminyden.model.EntityIdsDTO;
 import com.gmail.seminyden.model.SongMetadataDTO;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.jupiter.api.Assertions.*;
 

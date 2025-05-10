@@ -2,12 +2,10 @@ package com.gmail.seminyden.component;
 
 import com.gmail.seminyden.service.StorageService;
 import lombok.SneakyThrows;
-import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.web.client.RestTemplate;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -22,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mockito.Mockito.mock;
 
 @TestConfiguration
 public class TestConfig {
@@ -74,12 +74,12 @@ public class TestConfig {
     @Bean
     @Primary
     public RabbitTemplate rabbitTemplate() {
-        return Mockito.mock(RabbitTemplate.class);
+        return mock(RabbitTemplate.class);
     }
 
     @Bean
     @Primary
     public StorageService storageService() {
-        return Mockito.mock(StorageService.class);
+        return mock(StorageService.class);
     }
 } 

@@ -1,0 +1,70 @@
+{
+  "realm": "resource-app",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "resource-app-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "authorizationServicesEnabled": true,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "roles": {
+    "client": {
+      "resource-app-client": [
+        {
+          "name": "USER",
+          "clientRole": true
+        },
+        {
+          "name": "ADMIN",
+          "clientRole": true
+        }
+      ]
+    }
+  },
+  "users": [
+    {
+      "username": "user1",
+      "enabled": true,
+      "email": "user1@test.com",
+      "firstName": "Test user1",
+      "lastName": "Test user1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user1"
+        }
+      ],
+      "clientRoles": {
+        "resource-app-client": [
+          "USER"
+        ]
+      }
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "email": "admin1@test.com",
+      "firstName": "Test admin1",
+      "lastName": "Test admin1",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin1"
+        }
+      ],
+      "clientRoles": {
+        "resource-app-client": [
+          "ADMIN"
+        ]
+      }
+    }
+  ]
+}
